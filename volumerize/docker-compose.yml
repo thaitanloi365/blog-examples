@@ -1,0 +1,35 @@
+version: "3.3"
+
+services:
+  traefik:
+    image: traefik:v2.5
+    container_name: test-traefik
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - test_volume:/source
+  
+  volumerize:
+    image: blacklabelops/volumerize
+    container_name: test-volumerize
+    env_file: .env
+    restart: always
+    volumes:
+      - test_volume:/source/test_volume:ro
+      - volumerize-cache:/volumerize-cache
+      - backup:/backup
+    restart: always
+    environment:
+      - TZ=${VOLUMERIZE_TIMEZONE?VOLUMERIZE_TIMEZONE is required}
+      - VOLUMERIZE_SOURCE=/source
+      - VOLUMERIZE_TARGET=${VOLUMERIZE_TARGET?VOLUMERIZE_TARGET is required}
+      - VOLUMERIZE_JOBBER_TIME=${VOLUMERIZE_JOBBER_TIME?VOLUMERIZE_JOBBER_TIME is required}
+      - VOLUMERIZE_FULL_IF_OLDER_THAN=${VOLUMERIZE_FULL_IF_OLDER_THAN?VOLUMERIZE_FULL_IF_OLDER_THAN is required}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID?AWS_ACCESS_KEY_ID is required}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY?AWS_SECRET_ACCESS_KEY is required}
+
+
+volumes:
+  test_volume: {}
+  backup: {}
+  volumerize-cache: {}
